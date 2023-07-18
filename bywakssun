@@ -1,0 +1,46 @@
+local part = script.Parent
+local humanoid = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
+
+local canWallWalk = false
+
+-- Function to check if the humanoid is in contact with a wall
+local function checkWallContact()
+    local rootPart = humanoid.RootPart
+    if not rootPart then
+        return false
+    end
+
+    local rayOrigin = rootPart.Position
+    local rayDirection = rootPart.CFrame.UpVector * -1
+    local rayDistance = 5 -- You can adjust the distance as needed
+
+    local ray = Ray.new(rayOrigin, rayDirection * rayDistance)
+    local ignoreList = {rootPart, humanoid}
+
+    local hitPart, hitPosition = game.Workspace:FindPartOnRayWithIgnoreList(ray, ignoreList)
+    return hitPart and hitPart:IsA("Part")
+end
+
+-- Enable wall walking when pressing a specific key (e.g., "F")
+game:GetService("UserInputService").InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then
+        return
+    end
+
+    if input.KeyCode == Enum.KeyCode.F then
+        canWallWalk = not canWallWalk
+    end
+end)
+
+-- Main loop to apply wall walking effect
+while true do
+    wait(0.1) -- Adjust the delay as needed
+
+    if canWallWalk and checkWallContact() then
+        humanoid.Gravity = 0
+        humanoid.WalkSpeed = 100 -- You can adjust the walking speed as needed
+    else
+        humanoid.Gravity = 1
+        humanoid.WalkSpeed = 16 -- Reset the walking speed to normal when not wall walking
+    end
+end
